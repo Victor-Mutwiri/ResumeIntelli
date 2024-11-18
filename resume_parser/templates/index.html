@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Resume Parser</title>
+  </head>
+  <body>
+    <h1>Upload Your Resume</h1>
+    <form
+      action="{% url 'analyze_resume' %}"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      {% csrf_token %}
+      <label for="resume">Select Resume (PDF):</label>
+      <input
+        type="file"
+        name="resume"
+        id="resume"
+        accept="application/pdf"
+        required
+      />
+      <br />
+      <label for="job_description">Job Description:</label>
+      <textarea
+        name="job_description"
+        id="job_description"
+        rows="4"
+        required
+      ></textarea>
+      <br />
+      <button type="submit">Analyze</button>
+    </form>
+  </body>
+</html>

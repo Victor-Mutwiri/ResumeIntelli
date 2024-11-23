@@ -2,15 +2,42 @@
 <html>
   <head>
     <title>Resume Parser</title>
+    <script>
+      function analyzeResume(event) {
+        event.preventDefault();
+
+        const formData = new FormData(document.getElementById("resumeForm"));
+        const feedbackContainer = document.getElementById("feedbackContainer");
+        feedbackContainer.innerHTML = "Processing...";
+
+        // Updated fetch URL to match Django URL pattern
+        fetch("/resume/analyze-resume/", {
+          // Changed from analyze_resume to analyze-resume
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.feedback) {
+              feedbackContainer.innerHTML = `<pre>${data.feedback}</pre>`;
+            } else {
+              feedbackContainer.innerHTML = `<span style="color:red;">${data.error}</span>`;
+            }
+          })
+          .catch((error) => {
+            feedbackContainer.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+          });
+      }
+    </script>
   </head>
   <body>
     <h1>Upload Your Resume</h1>
-    <form
-      action="{% url 'analyze_resume' %}"
-      method="POST"
-      enctype="multipart/form-data"
-    >
-      {% csrf_token %}
+    <form id="resumeForm" onsubmit="analyzeResume(event)">
       <label for="resume">Select Resume (PDF):</label>
       <input
         type="file"
@@ -18,17 +45,23 @@
         id="resume"
         accept="application/pdf"
         required
-      />
-      <br />
+      /><br />
+
       <label for="job_description">Job Description:</label>
       <textarea
         name="job_description"
         id="job_description"
         rows="4"
         required
-      ></textarea>
-      <br />
+      ></textarea
+      ><br />
+
       <button type="submit">Analyze</button>
     </form>
+
+    <div
+      id="feedbackContainer"
+      style="margin-top: 20px; border: 1px solid #ccc; padding: 10px"
+    ></div>
   </body>
 </html>

@@ -218,6 +218,8 @@
             });
 
             if (!response.ok) {
+              const errorMessage = await response.text();
+              console.error(`Error response: ${errorMessage}`);
               throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -238,15 +240,13 @@
           }
         }
 
-        function showError(message) {
-          feedbackContainer.innerHTML = `
-            <div class="error-message">
-              ${message}
-              <br>
-              <small>Please refresh the page to try again.</small>
-            </div>
-          `;
-          resetButton.style.display = "block";
+        function showError(message, fileName = null) {
+          const errorDiv = document.createElement("div");
+          errorDiv.className = "error-message";
+          errorDiv.innerHTML = fileName
+            ? `Error with ${fileName}: ${message}`
+            : `${message}<br><small>Please refresh the page and try again.</small>`;
+          feedbackContainer.appendChild(errorDiv);
         }
 
         function displayFeedback(feedbackData) {

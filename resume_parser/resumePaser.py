@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import List
 import fitz
 from sentence_transformers import SentenceTransformer
@@ -7,6 +8,8 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 def read_text_from_pdf(pdf_path: str) -> str:
     """
@@ -19,25 +22,34 @@ def read_text_from_pdf(pdf_path: str) -> str:
         str: Extracted text from the PDF
     """
     try:
+        logger.info("Opening PDF file: %s", pdf_path)
         doc = fitz.open(pdf_path)
         text = ""
         for page in doc:
             text += page.get_text()
         doc.close()
+        logger.info("PDF text extraction successful for file: %s", pdf_path)
         return text.strip()
     except Exception as e:
+        logger.error("Error reading PDF file %s: %s", pdf_path, str(e))
         raise Exception(f"Error reading PDF: {str(e)}")
 
 class ResumeAnalyzer:
     def __init__(self):
-        api_key = os.getenv("GROQ_API_KEY")
-        if not api_key:
-            raise ValueError("Missing GROQ_API_KEY in environment variables")
-            
-        self.groq_client = Groq(api_key=api_key)
-        self.model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-        self.max_token_limit = 15000
-        self.used_tokens = 0
+        try:
+            api_key = os.getenv("GROQ_API_KEY")
+            if not api_key:
+                logger.error("GROQ_API_KEY is missing in environment variables.")
+                raise ValueError("Missing GROQ_API_KEY in environment variables")
+                
+            self.groq_client = Groq(api_key=api_key)
+            self.model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+            self.max_token_limit = 15000
+            self.used_tokens = 0
+            logger.info("ResumeAnalyzer initialized successfully.")
+        except Exception as e:
+            logger.critical("Failed to initialize ResumeAnalyzer: %s", str(e))
+            raise
 
     def extract_skills(self, text: str) -> List[str]:
         """

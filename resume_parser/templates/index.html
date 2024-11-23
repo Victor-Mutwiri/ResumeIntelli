@@ -1,67 +1,356 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Resume Parser</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resume Analyzer</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        padding: 0;
+        background-color: #f8f9fa;
+        color: #333;
+      }
+
+      h1 {
+        text-align: center;
+        color: #007bff;
+      }
+
+      form {
+        max-width: 700px;
+        margin: 20px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+      }
+
+      input,
+      textarea,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
+
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+
+      button:hover:not(:disabled) {
+        background-color: #0056b3;
+      }
+
+      #feedbackContainer {
+        max-width: 800px;
+        margin: 20px auto;
+      }
+
+      .resume-feedback {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .resume-name {
+        color: #007bff;
+        font-weight: bold;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+      }
+
+      .feedback-section {
+        margin-bottom: 20px;
+      }
+
+      .feedback-section h2 {
+        color: #007bff;
+        margin-bottom: 10px;
+        font-size: 1.5em;
+      }
+
+      .error-message {
+        color: #dc3545;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #007bff;
+      }
+
+      #selectedFiles {
+        margin: 10px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+      }
+
+      .file-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .file-list li {
+        margin: 5px 0;
+        padding: 5px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .reset-button {
+        background-color: #6c757d;
+        margin-top: 10px;
+      }
+
+      .reset-button:hover:not(:disabled) {
+        background-color: #545b62;
+      }
+    </style>
     <script>
-      function analyzeResume(event) {
-        event.preventDefault();
-
-        const formData = new FormData(document.getElementById("resumeForm"));
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("resumeForm");
+        const resumeInput = document.getElementById("resume");
+        const jobDescription = document.getElementById("job_description");
+        const analyzeButton = document.getElementById("analyzeButton");
+        const resetButton = document.getElementById("resetButton");
+        const selectedFiles = document.getElementById("selectedFiles");
         const feedbackContainer = document.getElementById("feedbackContainer");
-        feedbackContainer.innerHTML = "Processing...";
 
-        // Updated fetch URL to match Django URL pattern
-        fetch("/resume/analyze-resume/", {
-          // Changed from analyze_resume to analyze-resume
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => {
+        function updateAnalyzeButtonState() {
+          const files = resumeInput.files;
+          const description = jobDescription.value.trim();
+          analyzeButton.disabled =
+            files.length === 0 || files.length > 3 || description.length === 0;
+
+          // Update selected files display
+          if (files.length > 0) {
+            const fileList = document.createElement("ul");
+            fileList.className = "file-list";
+            Array.from(files).forEach((file) => {
+              const li = document.createElement("li");
+              li.textContent = file.name;
+              fileList.appendChild(li);
+            });
+            selectedFiles.innerHTML = "";
+            selectedFiles.appendChild(fileList);
+
+            if (files.length > 3) {
+              const error = document.createElement("div");
+              error.className = "error-message";
+              error.textContent = "Please select up to 3 resumes only";
+              selectedFiles.appendChild(error);
+            }
+          } else {
+            selectedFiles.innerHTML = "";
+          }
+        }
+
+        resumeInput.addEventListener("change", updateAnalyzeButtonState);
+        jobDescription.addEventListener("input", updateAnalyzeButtonState);
+
+        function resetForm() {
+          form.reset();
+          feedbackContainer.innerHTML = "";
+          selectedFiles.innerHTML = "";
+          analyzeButton.disabled = true;
+          analyzeButton.textContent = "Analyze";
+          resetButton.style.display = "none";
+        }
+
+        resetButton.addEventListener("click", resetForm);
+
+        async function analyzeResume(event) {
+          event.preventDefault();
+
+          const files = resumeInput.files;
+          if (files.length > 3) {
+            showError("Please select up to 3 resumes only");
+            return;
+          }
+
+          analyzeButton.disabled = true;
+          analyzeButton.textContent = "Analyzing...";
+          feedbackContainer.innerHTML =
+            '<div class="loading">Analyzing resumes... Please wait...</div>';
+
+          const formData = new FormData();
+
+          // Append each file individually
+          Array.from(files).forEach((file) => {
+            formData.append("resumes", file);
+          });
+          formData.append("job_description", jobDescription.value);
+
+          try {
+            const response = await fetch("/resume/analyze-resume/", {
+              method: "POST",
+              body: formData,
+            });
+
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.feedback) {
-              feedbackContainer.innerHTML = `<pre>${data.feedback}</pre>`;
+
+            const data = await response.json();
+
+            if (data.error) {
+              showError(data.error);
             } else {
-              feedbackContainer.innerHTML = `<span style="color:red;">${data.error}</span>`;
+              displayFeedback(data.feedback);
+              resetButton.style.display = "block";
             }
-          })
-          .catch((error) => {
-            feedbackContainer.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+          } catch (error) {
+            showError(
+              "An error occurred while analyzing the resumes. Please try again."
+            );
+          } finally {
+            analyzeButton.textContent = "Analysis Complete";
+          }
+        }
+
+        function showError(message) {
+          feedbackContainer.innerHTML = `
+            <div class="error-message">
+              ${message}
+              <br>
+              <small>Please refresh the page to try again.</small>
+            </div>
+          `;
+          resetButton.style.display = "block";
+        }
+
+        function displayFeedback(feedbackData) {
+          feedbackContainer.innerHTML = "";
+
+          if (Array.isArray(feedbackData)) {
+            feedbackData.forEach((item) => {
+              const feedbackElement = createFeedbackElement(
+                item.feedback,
+                item.filename
+              );
+              feedbackContainer.appendChild(feedbackElement);
+            });
+          } else {
+            const feedbackElement = createFeedbackElement(
+              feedbackData,
+              "Resume Analysis"
+            );
+            feedbackContainer.appendChild(feedbackElement);
+          }
+        }
+
+        function createFeedbackElement(feedback, title) {
+          const feedbackDiv = document.createElement("div");
+          feedbackDiv.className = "resume-feedback";
+
+          const titleElement = document.createElement("div");
+          titleElement.className = "resume-name";
+          titleElement.textContent = title;
+          feedbackDiv.appendChild(titleElement);
+
+          const sections =
+            typeof feedback === "string" ? { Analysis: feedback } : feedback;
+
+          Object.entries(sections).forEach(([sectionName, content]) => {
+            if (content) {
+              const section = document.createElement("div");
+              section.className = "feedback-section";
+              section.innerHTML = `
+                <h2>${formatSectionTitle(sectionName)}</h2>
+                <div>${formatContent(content)}</div>
+              `;
+              feedbackDiv.appendChild(section);
+            }
           });
-      }
+
+          return feedbackDiv;
+        }
+
+        function formatSectionTitle(name) {
+          return name.split(/(?=[A-Z])/).join(" ");
+        }
+
+        function formatContent(content) {
+          if (!content) return "<p>No information available</p>";
+
+          const lines = content.split("\n").filter((line) => line.trim());
+
+          if (lines.length > 1) {
+            return `<ul>${lines
+              .map((line) => `<li>${line}</li>`)
+              .join("")}</ul>`;
+          }
+          return `<p>${content}</p>`;
+        }
+
+        form.addEventListener("submit", analyzeResume);
+        updateAnalyzeButtonState();
+      });
     </script>
   </head>
   <body>
-    <h1>Upload Your Resume</h1>
-    <form id="resumeForm" onsubmit="analyzeResume(event)">
-      <label for="resume">Select Resume (PDF):</label>
+    <h1>Resume Analyzer</h1>
+    <form id="resumeForm">
+      <label for="resume">Select Resumes (Up to 3 PDFs):</label>
       <input
         type="file"
-        name="resume"
+        name="resumes"
         id="resume"
         accept="application/pdf"
+        multiple
         required
-      /><br />
+      />
+      <div id="selectedFiles"></div>
 
       <label for="job_description">Job Description:</label>
       <textarea
         name="job_description"
         id="job_description"
-        rows="4"
+        rows="10"
         required
-      ></textarea
-      ><br />
+      ></textarea>
 
-      <button type="submit">Analyze</button>
+      <button type="submit" id="analyzeButton" disabled>Analyze</button>
+      <button
+        type="button"
+        id="resetButton"
+        class="reset-button"
+        style="display: none"
+      >
+        Reset
+      </button>
     </form>
 
-    <div
-      id="feedbackContainer"
-      style="margin-top: 20px; border: 1px solid #ccc; padding: 10px"
-    ></div>
+    <div id="feedbackContainer"></div>
   </body>
 </html>

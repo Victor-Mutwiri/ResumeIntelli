@@ -82,15 +82,43 @@
         border-bottom: 2px solid #eee;
       }
 
+      {% comment %} added new style for feedback {% endcomment %}
+
       .feedback-section {
         margin-bottom: 20px;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
       }
 
       .feedback-section h2 {
-        color: #007bff;
-        margin-bottom: 10px;
+        color: #0056b3;
         font-size: 1.5em;
+        margin-bottom: 10px;
+        text-transform: capitalize;
       }
+
+      .feedback-section ul {
+        margin: 0;
+        padding-left: 20px;
+        list-style-type: disc;
+      }
+
+      .feedback-section p {
+        margin: 5px 0;
+      }
+
+      .highlight {
+        color: #dc3545;
+        font-weight: bold;
+      }
+
+      .key-skills, .missing-skills, .improvement-suggestions {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      {% comment %} ended style {% endcomment %}
 
       .error-message {
         color: #dc3545;
@@ -232,8 +260,10 @@
               resetButton.style.display = "block";
             }
           } catch (error) {
+            console.error("Analysis error:", error);
             showError(
-              "An error occurred while analyzing the resumes. Please try again."
+              error.message ||
+                "An error occurred while analyzing the resumes. Please try again."
             );
           } finally {
             analyzeButton.textContent = "Analysis Complete";
@@ -243,9 +273,26 @@
         function showError(message, fileName = null) {
           const errorDiv = document.createElement("div");
           errorDiv.className = "error-message";
-          errorDiv.innerHTML = fileName
-            ? `Error with ${fileName}: ${message}`
-            : `${message}<br><small>Please refresh the page and try again.</small>`;
+
+          // Check if the error message is an object with details
+          if (typeof message === "object" && message.error) {
+            errorDiv.innerHTML = `
+                  <strong>${fileName ? `Error with ${fileName}: ` : ""}${
+              message.error
+            }</strong>
+                  ${
+                    message.details
+                      ? `<br><small>Details: ${message.details}</small>`
+                      : ""
+                  }
+                  <br><small>Please check the console for more information.</small>
+              `;
+          } else {
+            errorDiv.innerHTML = fileName
+              ? `<strong>Error with ${fileName}:</strong> ${message}`
+              : `<strong>${message}</strong><br><small>Please check the console for more information.</small>`;
+          }
+
           feedbackContainer.appendChild(errorDiv);
         }
 
@@ -269,6 +316,7 @@
           }
         }
 
+        //initiate code change for function createFeedbackElement
         function createFeedbackElement(feedback, title) {
           const feedbackDiv = document.createElement("div");
           feedbackDiv.className = "resume-feedback";
@@ -284,9 +332,11 @@
           Object.entries(sections).forEach(([sectionName, content]) => {
             if (content) {
               const section = document.createElement("div");
-              section.className = "feedback-section";
+              section.className = `feedback-section ${sectionName
+                .toLowerCase()
+                .replace(/\s+/g, "-")}`;
               section.innerHTML = `
-                <h2>${formatSectionTitle(sectionName)}</h2>
+                <h1>${formatSectionTitle(sectionName)}</h1>
                 <div>${formatContent(content)}</div>
               `;
               feedbackDiv.appendChild(section);
@@ -300,17 +350,24 @@
           return name.split(/(?=[A-Z])/).join(" ");
         }
 
+        //initiate code change for function formatContent
         function formatContent(content) {
           if (!content) return "<p>No information available</p>";
 
-          const lines = content.split("\n").filter((line) => line.trim());
-
-          if (lines.length > 1) {
-            return `<ul>${lines
-              .map((line) => `<li>${line}</li>`)
+          if (Array.isArray(content)) {
+            return `<ul>${content
+              .map((item) => `<li>${item}</li>`)
               .join("")}</ul>`;
           }
-          return `<p>${content}</p>`;
+
+          if (typeof content === "string") {
+            const paragraphs = content
+              .split("\n")
+              .filter((line) => line.trim());
+            return paragraphs.map((line) => `<p>${line}</p>`).join("");
+          }
+
+          return `<p>${String(content)}</p>`;
         }
 
         form.addEventListener("submit", analyzeResume);

@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List
+from typing import List, Dict, Any
 import fitz
 from sentence_transformers import SentenceTransformer
 from groq import Groq
@@ -22,34 +22,31 @@ def read_text_from_pdf(pdf_path: str) -> str:
         str: Extracted text from the PDF
     """
     try:
-        logger.info("Opening PDF file: %s", pdf_path)
         doc = fitz.open(pdf_path)
         text = ""
         for page in doc:
             text += page.get_text()
         doc.close()
-        logger.info("PDF text extraction successful for file: %s", pdf_path)
         return text.strip()
     except Exception as e:
         logger.error("Error reading PDF file %s: %s", pdf_path, str(e))
-        raise Exception(f"Error reading PDF: {str(e)}")
+        raise ValueError(f"Could not read PDF file: {str(e)}")
 
 class ResumeAnalyzer:
     def __init__(self):
+        """Initialize the ResumeAnalyzer with required components."""
+        self.api_key = os.getenv("GROQ_API_KEY")
+        if not self.api_key:
+            raise ValueError("Missing GROQ_API_KEY in environment variables")
+
         try:
-            api_key = os.getenv("GROQ_API_KEY")
-            if not api_key:
-                logger.error("GROQ_API_KEY is missing in environment variables.")
-                raise ValueError("Missing GROQ_API_KEY in environment variables")
-                
-            self.groq_client = Groq(api_key=api_key)
+            self.groq_client = Groq(api_key=self.api_key)
             self.model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
             self.max_token_limit = 15000
             self.used_tokens = 0
-            logger.info("ResumeAnalyzer initialized successfully.")
         except Exception as e:
-            logger.critical("Failed to initialize ResumeAnalyzer: %s", str(e))
-            raise
+            logger.error("Failed to initialize ResumeAnalyzer components: %s", str(e))
+            raise ValueError(f"Failed to initialize analysis components: {str(e)}")
 
     def extract_skills(self, text: str) -> List[str]:
         """
@@ -63,10 +60,16 @@ class ResumeAnalyzer:
         """
         skill_indicators = [
             'proficient in', 'experience with', 'skilled in',
-            'knowledge of', 'familiar with', 'expertise in'
+            'knowledge of', 'familiar with', 'expertise in', 'essential qualifications',
+            'qualifications'
         ]
         skills = set()
         
+        # Ensure text is a string
+        if not isinstance(text, str):
+            logger.warning("Non-string input received for skill extraction")
+            return []
+
         for sentence in text.lower().split('.'):
             for indicator in skill_indicators:
                 if indicator in sentence:
@@ -78,7 +81,7 @@ class ResumeAnalyzer:
         
         return list(skills)
 
-    def analyze_match_with_groq(self, resume_text: str, job_description: str) -> str:
+    def analyze_match_with_groq(self, resume_text: str, job_description: str) -> Dict[str, Any]:
         """
         Analyze resume against job description using Groq API.
         
@@ -87,13 +90,13 @@ class ResumeAnalyzer:
             job_description (str): Job description text
             
         Returns:
-            str: Analysis feedback
+            Dict[str, Any]: Analysis feedback and extracted skills
         """
         if not resume_text or not job_description:
-            return "Resume text and job description cannot be empty."
-            
+            raise ValueError("Resume text and job description cannot be empty.")
+
         if self.used_tokens >= self.max_token_limit:
-            return "Token limit reached. Please try again later."
+            raise ValueError("Token limit reached. Please try again later.")
 
         prompt = [
             {"role": "system", "content": "You are a career coach assessing a resume against a job description."},
@@ -121,17 +124,27 @@ class ResumeAnalyzer:
                 stop=None
             )
             
+            if not response or not hasattr(response, 'choices') or not response.choices:
+                raise ValueError("Invalid response received from Groq API")
+
+            # Extract the content safely
             feedback = response.choices[0].message.content
+            if not isinstance(feedback, str):
+                logger.warning("Non-string feedback received from API, converting to string")
+                feedback = str(feedback)
+            
             self.used_tokens += len(resume_text.split()) + len(job_description.split())
             
-            # Structure the feedback
+            extracted_skills = self.extract_skills(resume_text)
+            
             return {
                 "Analysis": feedback,
-                "ExtractedSkills": self.extract_skills(resume_text)
+                "ExtractedSkills": extracted_skills
             }
             
         except Exception as e:
-            return f"Error during analysis: {str(e)}"
+            logger.error("Error in Groq API analysis: %s", str(e))
+            raise ValueError(f"Analysis failed: {str(e)}")
 
     def reset_token_count(self):
         """Reset the token count for new analysis session."""

@@ -1330,3 +1330,5 @@ Analysis Results:
 C:\Users\dell\Desktop\ResumeIntelli\config\settings.py changed, reloading.
 close.started
 close.complete
+Watching for file changes with StatReloader
+PyTorch version 2.5.0 available.

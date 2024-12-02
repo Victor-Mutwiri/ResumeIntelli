@@ -5,6 +5,7 @@ import ActionButtons from '../components/ActionButtons';
 import FeedbackDisplay from '../components/FeedbackDisplay';
 import CustomResumeDisplay from '../components/CustomResumeDisplay';
 import CoverLetterDisplay from '../components/CoverLetterDisplay';
+import './home.css'
 
 /* const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; */
 const API_BASE_URL = 'http://127.0.0.1:5000';
@@ -155,14 +156,38 @@ function Home() {
   };
 
   return (
-    <div>
-      <h1>Resume Analyzer</h1>
-      
-      <FileUpload onResumeChange={handleResumeChange} onJobDescriptionChange={handleJobDescriptionChange} jobDescription={jobDescription} />
-      <ActionButtons onAnalyze={handleAnalyze} onGenerateResume={handleGenerateCustomResume} onGenerateCoverLetter={handleGenerateCoverLetter} />
-      <FeedbackDisplay feedback={feedback} />
-      <CustomResumeDisplay customResume={customResume} />
-      <CoverLetterDisplay coverLetter={coverLetter} />
+    <div className="home-container">
+      <header className="header">
+        <h1>Resume Analyzer</h1>
+        <p className="tagline">Optimize your job application with tailored insights and tools.</p>
+      </header>
+
+      <section className="upload-section">
+        <h2>Upload Your Files</h2>
+        <FileUpload
+          onResumeChange={handleResumeChange}
+          onJobDescriptionChange={handleJobDescriptionChange}
+          jobDescription={jobDescription}
+        />
+      </section>
+
+      <section className="action-buttons-section">
+        <ActionButtons
+          onAnalyze={handleAnalyze}
+          onGenerateResume={handleGenerateCustomResume}
+          onGenerateCoverLetter={handleGenerateCoverLetter}
+        />
+      </section>
+
+      <section className="feedback-section">
+        <h2>Analysis Feedback</h2>
+        <FeedbackDisplay feedback={feedback} />
+      </section>
+
+      <section className="output-section">
+        <CustomResumeDisplay customResume={customResume} />
+        <CoverLetterDisplay coverLetter={coverLetter} />
+      </section>
     </div>
   );
 }

@@ -1,0 +1,61 @@
+/* Container for buttons */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Spacing between buttons */
+    margin-top: 20px;
+    flex-wrap: wrap; /* Ensures buttons wrap on smaller screens */
+  }
+  
+  /* Button Styling */
+  .action-button {
+    background-color: #007acc; /* Primary color */
+    color: #fff; /* Text color */
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds depth */
+  }
+  
+  .action-button:hover {
+    background-color: #005fa3; /* Slightly darker shade for hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+  }
+  
+  .action-button:active {
+    background-color: #00457a; /* Even darker shade for active state */
+    transform: translateY(0); /* Reset lift on click */
+  }
+  
+  .action-button.analyze {
+    background-color: #007acc;
+  }
+  
+  .action-button.generate-resume {
+    background-color: #28a745; /* Green for resume generation */
+  }
+  
+  .action-button.generate-cover-letter {
+    background-color: #ffc107; /* Yellow for cover letter generation */
+  }
+  
+  .action-button.generate-resume:hover {
+    background-color: #218838;
+  }
+  
+  .action-button.generate-cover-letter:hover {
+    background-color: #e0a800;
+  }
+  
+  /* Mobile-Friendly Adjustments */
+  @media (max-width: 768px) {
+    .action-button {
+      width: 100%; /* Full-width buttons on smaller screens */
+      text-align: center;
+    }
+  }
+  

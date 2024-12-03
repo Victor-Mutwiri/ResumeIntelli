@@ -1,0 +1,16 @@
+.custom-resume-container{
+    max-width: 800px;
+}
+
+.custom-resume-container h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.custom-resume-content p {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    line-height: 1.6;
+}

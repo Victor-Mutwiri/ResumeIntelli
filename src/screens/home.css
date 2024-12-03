@@ -1,19 +1,21 @@
 /* Overall container styling */
 .home-container {
+    display: flex;
+    flex-direction: column;
     font-family: 'Arial', sans-serif;
     color: #333;
     padding: 20px;
-    margin: 0 auto;
+    /* margin: 0 auto; */
     /* max-width: 1200px; */
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    /* background-color: #f9f9f9; */
+    /* border-radius: 10px; */
+    /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); */
   }
   
   /* Header */
   .header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
   }
   
   .header h1 {
@@ -26,25 +28,32 @@
     font-size: 1.1rem;
     color: #555;
   }
+
+  .upload-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+  }
   
   /* Section headers */
   section {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
   
   section h2 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #007acc;
-    margin-bottom: 15px;
+    /* margin-bottom: 15px; */
   }
   
   /* File upload section */
-  .upload-section {
+  /* .upload-section {
     background: #fff;
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
+  } */
   
   /* Action buttons */
   .action-buttons-section {
@@ -55,12 +64,12 @@
   /* Feedback section */
   .feedback-section {
     background: #e9f6fc;
-    padding: 20px;
+    padding: 10px;
     border-radius: 8px;
   }
   
   .feedback-section h2 {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
   
   /* Output section */

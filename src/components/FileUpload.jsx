@@ -4,7 +4,7 @@ import '../styles/FileUpload.css';
 function FileUpload({ onResumeChange, onJobDescriptionChange, jobDescription }) {
   return (
     <div className="file-upload-container">
-      <div className="upload-section">
+      <div className="upload-sections">
         <label htmlFor="resume-upload" className="upload-label">
           Upload Resume (PDF)
         </label>
@@ -25,7 +25,7 @@ function FileUpload({ onResumeChange, onJobDescriptionChange, jobDescription }) 
           placeholder="Paste the job description here..."
           value={jobDescription}
           onChange={onJobDescriptionChange}
-          rows={6}
+          rows={10}
           className="textarea"
         />
       </div>

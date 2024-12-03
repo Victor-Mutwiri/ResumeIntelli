@@ -162,25 +162,27 @@ function Home() {
         <p className="tagline">Optimize your job application with tailored insights and tools.</p>
       </header>
 
-      <section className="upload-section">
-        <h2>Upload Your Files</h2>
-        <FileUpload
-          onResumeChange={handleResumeChange}
-          onJobDescriptionChange={handleJobDescriptionChange}
-          jobDescription={jobDescription}
-        />
-      </section>
+      <div className="upload-container">
+        <section className="upload-section">
+            {/* <h2>Upload Your Files</h2> */}
+            <FileUpload
+            onResumeChange={handleResumeChange}
+            onJobDescriptionChange={handleJobDescriptionChange}
+            jobDescription={jobDescription}
+            />
+        </section>
 
-      <section className="action-buttons-section">
-        <ActionButtons
-          onAnalyze={handleAnalyze}
-          onGenerateResume={handleGenerateCustomResume}
-          onGenerateCoverLetter={handleGenerateCoverLetter}
-        />
-      </section>
+        <section className="action-buttons-section">
+            <ActionButtons
+            onAnalyze={handleAnalyze}
+            onGenerateResume={handleGenerateCustomResume}
+            onGenerateCoverLetter={handleGenerateCoverLetter}
+            />
+        </section>
+      </div>
 
       <section className="feedback-section">
-        <h2>Analysis Feedback</h2>
+        {/* <h2>Results</h2> */}
         <FeedbackDisplay feedback={feedback} />
       </section>
 

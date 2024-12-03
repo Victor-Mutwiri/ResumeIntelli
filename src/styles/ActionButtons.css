@@ -1,10 +1,10 @@
 /* Container for buttons */
 .button-group {
     display: flex;
-    justify-content: center;
-    gap: 15px; /* Spacing between buttons */
-    margin-top: 20px;
-    flex-wrap: wrap; /* Ensures buttons wrap on smaller screens */
+    flex-direction: column;
+    margin-top: 3rem;
+    justify-content: space-between;
+    gap: 1rem;
   }
   
   /* Button Styling */

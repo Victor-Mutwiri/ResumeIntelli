@@ -1,5 +1,10 @@
 .custom-resume-container{
     max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .custom-resume-container h2 {
@@ -10,7 +15,13 @@
 }
 
 .custom-resume-content p {
-    font-size: 1rem;
-    margin: 0.5rem 0;
+    background-color: white;
+  padding: 30px;
+    border-radius: 8px;
     line-height: 1.6;
+}
+
+.custom-resume-content p {
+    margin-bottom: 10px;
+    color: #333;
 }

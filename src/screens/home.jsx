@@ -79,6 +79,7 @@ function Home() {
 
       const data = await response.json();
       if (response.ok) {
+        console.log('Generated Custom Resume:', data.custom_resume);
         setCustomResume(data.custom_resume);
       } else {
         alert(data.error || 'An error occurred');

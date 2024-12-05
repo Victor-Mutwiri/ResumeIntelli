@@ -1,27 +1,85 @@
-.custom-resume-container{
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f4f4f4;
+.custom-resume-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.custom-resume-container h2 {
+    font-family: 'Arial', sans-serif;
+    text-align: left;
+  }
+  
+  .custom-resume-content h2 {
+    color: #2c3e50;
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin: 1.5rem 0 1rem;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+    text-align: center;
+  }
+  
+  .custom-resume-content h3 {
+    color: #34495e;
     font-size: 1.5rem;
     font-weight: bold;
-    margin-bottom: 1rem;
-    color: #333;
-}
-
-.custom-resume-content p {
-    background-color: white;
-  padding: 30px;
-    border-radius: 8px;
+    margin: 1rem 0;
+  }
+  
+  .custom-resume-content em {
+    font-style: italic;
+    color: #7f8c8d;
+  }
+  
+  .custom-resume-content p {
+    color: #2c3e50;
     line-height: 1.6;
-}
+    margin: 0.5rem 0;
+  }
+  
+  .custom-resume-content ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+    text-align: left;
+  }
+  
+  .custom-resume-content li {
+    color: #2c3e50;
+    line-height: 1.6;
+    margin: 0.25rem 0;
+  }
+  
+  .custom-resume-content a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  .custom-resume-content a:hover {
+    text-decoration: underline;
+  }
 
-.custom-resume-content p {
-    margin-bottom: 10px;
-    color: #333;
-}
+  .custom-resume-content.editable {
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+    min-height: 500px;
+    outline: none;
+  }
+  
+  .editor-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .editor-actions button {
+    padding: 0.5rem 1rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .editor-actions button:hover {
+    background-color: #2980b9;
+  }

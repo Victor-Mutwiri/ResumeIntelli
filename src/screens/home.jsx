@@ -47,6 +47,7 @@ function Home() {
 
       const data = await response.json();
       if (response.ok) {
+        console.log('Feedback:', data.feedback);
         const formattedFeedback = formatFeedback(data.feedback);
         setFeedback(formattedFeedback);
       } else {
@@ -63,11 +64,11 @@ function Home() {
       alert('Please provide both a resume and a job description.');
       return;
     }
-
+  
     const formData = new FormData();
     formData.append('resume', resume);
     formData.append('jobDescription', jobDescription);
-
+  
     try {
       const response = await fetch(`${API_BASE_URL}/api/generate_custom_resume`, {
         method: 'POST',
@@ -76,11 +77,12 @@ function Home() {
           'Accept': 'application/json',
         },
       });
-
+  
       const data = await response.json();
       if (response.ok) {
         console.log('Generated Custom Resume:', data.custom_resume);
-        setCustomResume(data.custom_resume);
+        const formattedCustomResume = formatCustomResume(data.custom_resume);
+        setCustomResume(formattedCustomResume);
       } else {
         alert(data.error || 'An error occurred');
       }
@@ -140,6 +142,39 @@ function Home() {
     });
     return formattedSections.join('');
   };
+
+  function formatCustomResume(customResume) {
+    if (!customResume) return '';
+  
+    const sections = customResume.split('\n\n').filter(section => section.trim() !== '');
+    const formattedSections = sections.map(section => {
+      const lines = section.split('\n').filter(line => line.trim() !== '');
+      const firstLine = lines[0].trim();
+  
+      if (firstLine.toUpperCase() === firstLine) {
+        // This is a section heading
+        return `<h2>${firstLine}</h2>${lines.slice(1).map(line => `<p>${line.trim()}</p>`).join('')}`;
+      } else if (firstLine.startsWith('•')) {
+        // This is a list of skills or achievements
+        return `<ul>${lines.map(line => `<li>${line.replace('•', '').trim()}</li>`).join('')}</ul>`;
+      } else if (firstLine.includes('**')) {
+        // This is a work experience entry
+        const [companyAndTitle, dates] = firstLine.split('_');
+        const [company, title] = companyAndTitle.split('**').map(s => s.trim());
+        const achievements = lines.slice(1).map(line => `<li>${line.replace('•', '').trim()}</li>`).join('');
+        return `<div><h3>${company} | ${title} | <em>${dates}</em></h3><ul>${achievements}</ul></div>`;
+      } else if (firstLine.includes(':')) {
+        // Handle sections with colons (e.g., SUMMARY:)
+        const [heading, ...content] = lines;
+        return `<h2>${heading.replace(':', '').trim()}</h2>${content.map(line => `<p>${line.trim()}</p>`).join('')}`;
+      } else {
+        // Default to paragraph
+        return `<p>${lines.join(' ')}</p>`;
+      }
+    });
+  
+    return formattedSections.join('');
+  }
 
   const checkHealth = async () => {
     try {

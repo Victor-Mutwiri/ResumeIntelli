@@ -1,5 +1,5 @@
 .custom-resume-container {
-    max-width: 600px;
+    max-width: 850px;
     margin: 2rem auto;
     padding: 2rem;
     background: white;
@@ -11,7 +11,7 @@
   
   .custom-resume-content h2 {
     color: #2c3e50;
-    font-size: 1.75rem;
+    font-size: 1.4rem;
     font-weight: bold;
     margin: 1.5rem 0 1rem;
     border-bottom: 2px solid #3498db;
@@ -21,7 +21,7 @@
   
   .custom-resume-content h3 {
     color: #34495e;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     margin: 1rem 0;
   }
@@ -82,4 +82,35 @@
   
   .editor-actions button:hover {
     background-color: #2980b9;
+  }
+
+  .resume-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .resume-header h1 {
+    font-size: 1.7rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+  }
+  
+  .contact-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .contact-info p {
+    margin: 0;
+  }
+  
+  .contact-info a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  .contact-info a:hover {
+    text-decoration: underline;
   }

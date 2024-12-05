@@ -5,6 +5,7 @@ import ActionButtons from '../components/ActionButtons';
 import FeedbackDisplay from '../components/FeedbackDisplay';
 import CustomResumeDisplay from '../components/CustomResumeDisplay';
 import CoverLetterDisplay from '../components/CoverLetterDisplay';
+import UserDetailsModal from '../components/UserDetailsModal';
 import './home.css'
 
 /* const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; */
@@ -17,6 +18,9 @@ function Home() {
   const [customResume, setCustomResume] = useState('');
   const [healthStatus, setHealthStatus] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
+  const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
+  const [userDetails, setUserDetails] = useState(null);
+  const [pendingResume, setPendingResume] = useState(false);
 
   const handleResumeChange = (e) => {
     setResume(e.target.files[0]);
@@ -64,11 +68,22 @@ function Home() {
       alert('Please provide both a resume and a job description.');
       return;
     }
-  
+
+    // Show the modal to collect user details
+    setShowUserDetailsModal(true);
+    setPendingResume(true);
+  };
+
+  const handleUserDetailsSubmit = async (details) => {
+    setUserDetails(details);
+    setShowUserDetailsModal(false);
+    
+    // Now proceed with generating the resume
     const formData = new FormData();
     formData.append('resume', resume);
     formData.append('jobDescription', jobDescription);
-  
+    formData.append('userDetails', JSON.stringify(details));
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/generate_custom_resume`, {
         method: 'POST',
@@ -77,11 +92,10 @@ function Home() {
           'Accept': 'application/json',
         },
       });
-  
+
       const data = await response.json();
       if (response.ok) {
-        console.log('Generated Custom Resume:', data.custom_resume);
-        const formattedCustomResume = formatCustomResume(data.custom_resume);
+        const formattedCustomResume = formatCustomResume(data.custom_resume, details);
         setCustomResume(formattedCustomResume);
       } else {
         alert(data.error || 'An error occurred');
@@ -90,6 +104,7 @@ function Home() {
       console.error('Error:', error);
       alert('An error occurred while generating the custom resume.');
     }
+    setPendingResume(false);
   };
 
 
@@ -143,8 +158,21 @@ function Home() {
     return formattedSections.join('');
   };
 
-  function formatCustomResume(customResume) {
+  function formatCustomResume(customResume, details) {
     if (!customResume) return '';
+
+    const headerSection = `
+      <div class="resume-header">
+        <h1>${details.name}</h1>
+        <div class="contact-info">
+          <p>${details.email} | ${details.phone}</p>
+          <p>${details.location}</p>
+          ${details.linkedin ? `<p><a href="${details.linkedin}" target="_blank">LinkedIn</a></p>` : ''}
+          ${details.github ? `<p><a href="${details.github}" target="_blank">GitHub</a></p>` : ''}
+          ${details.portfolio ? `<p><a href="${details.portfolio}" target="_blank">Portfolio</a></p>` : ''}
+        </div>
+      </div>
+    `;
   
     const sections = customResume.split('\n\n').filter(section => section.trim() !== '');
     const formattedSections = sections.map(section => {
@@ -173,7 +201,7 @@ function Home() {
       }
     });
   
-    return formattedSections.join('');
+    return headerSection +formattedSections.join('');
   }
 
   const checkHealth = async () => {
@@ -208,6 +236,15 @@ function Home() {
             />
         </section>
 
+        {showUserDetailsModal && (
+          <UserDetailsModal
+            onSubmit={handleUserDetailsSubmit}
+            onClose={() => {
+              setShowUserDetailsModal(false);
+              setPendingResume(false);
+            }}
+          />
+        )}
         <section className="action-buttons-section">
             <ActionButtons
             onAnalyze={handleAnalyze}

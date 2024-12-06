@@ -1,5 +1,7 @@
 // App.js
 import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLinkedinIn, faGithub} from '@fortawesome/free-brands-svg-icons';
 import FileUpload from '../components/FileUpload';
 import ActionButtons from '../components/ActionButtons';
 import FeedbackDisplay from '../components/FeedbackDisplay';
@@ -95,6 +97,7 @@ function Home() {
 
       const data = await response.json();
       if (response.ok) {
+        console.log('Custom Resume:', data.custom_resume);
         const formattedCustomResume = formatCustomResume(data.custom_resume, details);
         setCustomResume(formattedCustomResume);
       } else {
@@ -165,10 +168,9 @@ function Home() {
       <div class="resume-header">
         <h1>${details.name}</h1>
         <div class="contact-info">
-          <p>${details.email} | ${details.phone}</p>
-          <p>${details.location}</p>
-          ${details.linkedin ? `<p><a href="${details.linkedin}" target="_blank">LinkedIn</a></p>` : ''}
-          ${details.github ? `<p><a href="${details.github}" target="_blank">GitHub</a></p>` : ''}
+          <p>${details.email} | ${details.phone} | ${details.location}</p>
+          ${details.linkedin ? `<p><FontAwesomeIcon icon={faLinkedinIn} /><a href="${details.linkedin}" target="_blank">LinkedIn</a></p>` : ''}
+          ${details.github ? `<p><FontAwesomeIcon icon={faGithub} /><a href="${details.github}" target="_blank">GitHub</a></p>` : ''}
           ${details.portfolio ? `<p><a href="${details.portfolio}" target="_blank">Portfolio</a></p>` : ''}
         </div>
       </div>
@@ -184,17 +186,17 @@ function Home() {
         return `<h2>${firstLine}</h2>${lines.slice(1).map(line => `<p>${line.trim()}</p>`).join('')}`;
       } else if (firstLine.startsWith('•')) {
         // This is a list of skills or achievements
-        return `<ul>${lines.map(line => `<li>${line.replace('•', '').trim()}</li>`).join('')}</ul>`;
+        return `<ul>${lines.map(line => `<li>${line.replace('•', '', '+').trim()}</li>`).join('')}</ul>`;
       } else if (firstLine.includes('**')) {
         // This is a work experience entry
         const [companyAndTitle, dates] = firstLine.split('_');
         const [company, title] = companyAndTitle.split('**').map(s => s.trim());
-        const achievements = lines.slice(1).map(line => `<li>${line.replace('•', '').trim()}</li>`).join('');
+        const achievements = lines.slice(1).map(line => `<li>${line.replace('•', '', '+').trim()}</li>`).join('');
         return `<div><h3>${company} | ${title} | <em>${dates}</em></h3><ul>${achievements}</ul></div>`;
       } else if (firstLine.includes(':')) {
         // Handle sections with colons (e.g., SUMMARY:)
         const [heading, ...content] = lines;
-        return `<h2>${heading.replace(':', '').trim()}</h2>${content.map(line => `<p>${line.trim()}</p>`).join('')}`;
+        return `<h2>${heading.replace(':', '', '+').trim()}</h2>${content.map(line => `<p>${line.trim()}</p>`).join('')}`;
       } else {
         // Default to paragraph
         return `<p>${lines.join(' ')}</p>`;
@@ -260,7 +262,7 @@ function Home() {
       </section>
 
       <section className="output-section">
-        <CustomResumeDisplay customResume={customResume} />
+        <CustomResumeDisplay customResume={customResume} userDetails={userDetails}/>
         <CoverLetterDisplay coverLetter={coverLetter} />
       </section>
     </div>

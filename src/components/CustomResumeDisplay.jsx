@@ -1,42 +1,52 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import ResumePDF from './ResumePDF';
 import FormatToolbar from './FormatToolbar';
 import '../styles/CustomResumeDisplay.css';
 
-const CustomResumeDisplay = ({ customResume }) => {
+const CustomResumeDisplay = ({ customResume, userDetails }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(customResume);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
   const editorRef = useRef(null);
 
   useEffect(() => {
-    setEditedContent(customResume);
+    if (customResume) {
+      setEditedContent(customResume);
+    }
   }, [customResume]);
 
-  const handleFormat = (formatType) => {
+  const handleFormat = (command, value = null) => {
+    if (!editorRef.current) return;
+
+    // Get the current selection
     const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+    const range = selection?.getRangeAt(0);
 
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
+    if (!selection || !range) return;
 
-    if (!selectedText) return;
-
-    switch (formatType) {
+    // Handle different formatting commands
+    switch (command) {
       case 'bold':
-        applyFormatting('strong');
+        applyInlineStyle('font-weight', 'bold');
         break;
       case 'italic':
-        applyFormatting('em');
+        applyInlineStyle('font-style', 'italic');
         break;
       case 'underline':
-        applyFormatting('u');
+        applyInlineStyle('text-decoration', 'underline');
         break;
-      case 'increaseFontSize':
-        const fontSize = parseInt(window.getComputedStyle(range.commonAncestorContainer.parentElement).fontSize);
-        applyStyle({ fontSize: `${fontSize + 2}px` });
+      case 'alignLeft':
+        applyBlockStyle('text-align', 'left');
         break;
-      case 'decreaseFontSize':
-        const currentSize = parseInt(window.getComputedStyle(range.commonAncestorContainer.parentElement).fontSize);
-        applyStyle({ fontSize: `${Math.max(currentSize - 2, 8)}px` });
+      case 'alignCenter':
+        applyBlockStyle('text-align', 'center');
+        break;
+      case 'alignRight':
+        applyBlockStyle('text-align', 'right');
+        break;
+      case 'color':
+        applyInlineStyle('color', value);
         break;
       case 'bulletList':
         createList('ul');
@@ -45,58 +55,60 @@ const CustomResumeDisplay = ({ customResume }) => {
         createList('ol');
         break;
       default:
-        break;
+        console.warn(`Unsupported format command: ${command}`);
     }
+
+    // Restore focus to the editor
+    editorRef.current.focus();
   };
 
-  const applyFormatting = (tag) => {
+  const applyInlineStyle = (property, value) => {
     const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const element = document.createElement(tag);
-    
-    try {
-      range.surroundContents(element);
-    } catch (e) {
-      console.warn('Could not apply formatting:', e);
-    }
-  };
-
-  const applyStyle = (styles) => {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+    if (!selection?.rangeCount) return;
 
     const range = selection.getRangeAt(0);
     const span = document.createElement('span');
-    Object.assign(span.style, styles);
+    span.style[property] = value;
     
-    try {
-      range.surroundContents(span);
-    } catch (e) {
-      console.warn('Could not apply style:', e);
+    range.surroundContents(span);
+  };
+
+  const applyBlockStyle = (property, value) => {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    let block = range.commonAncestorContainer;
+    
+    // Find the closest block-level element
+    while (block && block.nodeType === Node.TEXT_NODE) {
+      block = block.parentNode;
+    }
+
+    if (block && block instanceof HTMLElement) {
+      block.style[property] = value;
     }
   };
 
   const createList = (listType) => {
     const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+    if (!selection?.rangeCount) return;
 
     const range = selection.getRangeAt(0);
     const list = document.createElement(listType);
     const listItem = document.createElement('li');
     
-    try {
-      listItem.appendChild(range.extractContents());
-      list.appendChild(listItem);
-      range.insertNode(list);
-    } catch (e) {
-      console.warn('Could not create list:', e);
-    }
+    // Get the selected content
+    const content = range.extractContents();
+    listItem.appendChild(content);
+    list.appendChild(listItem);
+    
+    range.insertNode(list);
   };
 
   const handleEdit = () => {
     setIsEditing(true);
+    setShowPdfPreview(false);
   };
 
   const handleSave = () => {
@@ -106,7 +118,12 @@ const CustomResumeDisplay = ({ customResume }) => {
     setIsEditing(false);
   };
 
-  if (!customResume) return null;
+  const handlePreviewPDF = () => {
+    setShowPdfPreview(true);
+    setIsEditing(false);
+  };
+
+  if (!editedContent) return null;
 
   return (
     <div className="custom-resume-container">
@@ -132,7 +149,25 @@ const CustomResumeDisplay = ({ customResume }) => {
           />
           <div className="editor-actions">
             <button onClick={handleEdit}>Edit Resume</button>
+            <button onClick={handlePreviewPDF}>Preview PDF</button>
+            <PDFDownloadLink
+              document={<ResumePDF content={editedContent} userDetails={userDetails} />}
+              fileName="resume.pdf"
+              className="download-button"
+            >
+              {({ blob, url, loading, error }) =>
+                loading ? 'Loading document...' : 'Download PDF'
+              }
+            </PDFDownloadLink>
           </div>
+          
+          {showPdfPreview && (
+            <div className="pdf-preview-container">
+              <PDFViewer width="100%" height="600px">
+                <ResumePDF content={editedContent} userDetails={userDetails} />
+              </PDFViewer>
+            </div>
+          )}
         </>
       )}
     </div>

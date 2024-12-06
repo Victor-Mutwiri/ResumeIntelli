@@ -9,11 +9,11 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 20,
+    textAlign: 'center',
   },
   name: {
     fontSize: 24,
     marginBottom: 5,
-    textAlign: 'center',
   },
   contactInfo: {
     fontSize: 10,
@@ -45,44 +45,57 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
     marginBottom: 3,
   },
+  experienceTitle: {
+    fontSize: 12,
+    marginBottom: 5,
+    fontWeight: 'medium',
+    marginTop: 10,
+  },
+  experienceList: {
+    marginLeft: 15,
+    marginBottom: 10,
+  },
+  companyName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 3,
+  }
 });
 
 const ResumePDF = ({ content, userDetails }) => {
   // Parse the HTML content into structured sections
-  const parsedSections = parseHtmlContent(content || '');
+  const parsedSections = parseHtmlContent(content);
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+        {/* Header Section */}
         <View style={styles.header}>
-          <Text style={styles.name}>{userDetails?.name || ''}</Text>
+          <Text style={styles.name}>{userDetails.name}</Text>
           <Text style={styles.contactInfo}>
-            {[
-              userDetails?.email,
-              userDetails?.phone,
-              userDetails?.location
-            ].filter(Boolean).join(' | ')}
+            {userDetails.email} | {userDetails.phone} | {userDetails.location}
           </Text>
-          {userDetails?.linkedin && (
+          {userDetails.linkedin && (
             <Text style={styles.contactInfo}>LinkedIn: {userDetails.linkedin}</Text>
           )}
-          {userDetails?.github && (
+          {userDetails.github && (
             <Text style={styles.contactInfo}>GitHub: {userDetails.github}</Text>
           )}
-          {userDetails?.portfolio && (
+          {userDetails.portfolio && (
             <Text style={styles.contactInfo}>Portfolio: {userDetails.portfolio}</Text>
           )}
         </View>
 
+        {/* Render each section from parsed content */}
         {parsedSections.map((section, sectionIndex) => (
           <View key={sectionIndex} style={styles.section}>
-            <Text style={styles.sectionTitle}>{section.title || ''}</Text>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
             
             {section.content.map((item, itemIndex) => {
               if (item.type === 'paragraph') {
                 return (
                   <Text key={itemIndex} style={styles.paragraph}>
-                    {item.text || ''}
+                    {item.text}
                   </Text>
                 );
               } else if (item.type === 'list') {
@@ -90,9 +103,22 @@ const ResumePDF = ({ content, userDetails }) => {
                   <View key={itemIndex} style={styles.list}>
                     {item.items.map((listItem, listItemIndex) => (
                       <Text key={listItemIndex} style={styles.listItem}>
-                        • {listItem || ''}
+                        • {listItem}
                       </Text>
                     ))}
+                  </View>
+                );
+              } else if (item.type === 'experience') {
+                return (
+                  <View key={itemIndex}>
+                    <Text style={styles.companyName}>{item.title}</Text>
+                    <View style={styles.experienceList}>
+                      {item.items.map((exp, expIndex) => (
+                        <Text key={expIndex} style={styles.listItem}>
+                          • {exp}
+                        </Text>
+                      ))}
+                    </View>
                   </View>
                 );
               }

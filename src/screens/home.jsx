@@ -8,10 +8,9 @@ import FeedbackDisplay from '../components/FeedbackDisplay';
 import CustomResumeDisplay from '../components/CustomResumeDisplay';
 import CoverLetterDisplay from '../components/CoverLetterDisplay';
 import UserDetailsModal from '../components/UserDetailsModal';
+import { API_BASE_URL } from '../config/config';
 import './home.css'
 
-/* const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; */
-const API_BASE_URL = 'http://127.0.0.1:5000';
 
 function Home() {
   const [resume, setResume] = useState(null);
@@ -48,17 +47,19 @@ function Home() {
         body: formData,
         headers: {
           'Accept': 'application/json',
+          'Origin': window.location.origin,
         },
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        console.log('Feedback:', data.feedback);
-        const formattedFeedback = formatFeedback(data.feedback);
-        setFeedback(formattedFeedback);
-      } else {
-        alert(data.error || 'An error occurred');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
+  
+      const data = await response.json();
+      console.log('Feedback:', data.feedback);
+      const formattedFeedback = formatFeedback(data.feedback);
+      setFeedback(formattedFeedback);
     } catch (error) {
       console.error('Error:', error);
       alert('An error occurred while analyzing the resume.');

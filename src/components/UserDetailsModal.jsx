@@ -2,14 +2,18 @@ import React, { useState } from 'react';
 import '../styles/UserDetailsModal.css';
 
 const UserDetailsModal = ({ onSubmit, onClose }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    location: '',
-    linkedin: '',
-    github: '',
-    portfolio: ''
+  const [formData, setFormData] = useState(() => {
+    // Check sessionStorage for existing data when component mounts
+    const savedData = sessionStorage.getItem('userDetails');
+    return savedData ? JSON.parse(savedData) : {
+      name: '',
+      email: '',
+      phone: '',
+      location: '',
+      linkedin: '',
+      github: '',
+      portfolio: ''
+    };
   });
 
   const handleChange = (e) => {
@@ -26,6 +30,8 @@ const UserDetailsModal = ({ onSubmit, onClose }) => {
       alert('Please fill in all required fields');
       return;
     }
+    // Save to sessionStorage before submitting
+    sessionStorage.setItem('userDetails', JSON.stringify(formData));
     onSubmit(formData);
   };
 

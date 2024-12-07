@@ -1,0 +1,10 @@
+.cover-letter-container{
+    width: 800px;
+    align-self: flex-start;
+    text-align: left;
+}
+.cover-letter-content{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}

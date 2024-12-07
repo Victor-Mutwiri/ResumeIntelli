@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/CoverLetterDisplay.css';
 
 function CoverLetterDisplay({ coverLetter }) {
   if (!coverLetter) return null;

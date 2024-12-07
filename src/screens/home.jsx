@@ -256,16 +256,17 @@ function Home() {
             />
         </section>
       </div>
+      <div className='feedback'>
+        <section className="feedback-section">
+          {/* <h2>Results</h2> */}
+          <FeedbackDisplay feedback={feedback} />
+        </section>
 
-      <section className="feedback-section">
-        {/* <h2>Results</h2> */}
-        <FeedbackDisplay feedback={feedback} />
-      </section>
-
-      <section className="output-section">
-        <CustomResumeDisplay customResume={customResume} userDetails={userDetails}/>
-        <CoverLetterDisplay coverLetter={coverLetter} />
-      </section>
+        <section className="output-section">
+          <CustomResumeDisplay customResume={customResume} userDetails={userDetails}/>
+          <CoverLetterDisplay coverLetter={coverLetter} />
+        </section>
+      </div>
     </div>
   );
 }

@@ -32,15 +32,15 @@
   }
   
   .action-button.analyze {
-    background-color: #007acc;
+    background-color: #568C69;
   }
   
   .action-button.generate-resume {
-    background-color: #28a745; /* Green for resume generation */
+    background-color: #1E4006; /* Green for resume generation */
   }
   
   .action-button.generate-cover-letter {
-    background-color: #ffc107; /* Yellow for cover letter generation */
+    background-color: #6E8C2E; /* Yellow for cover letter generation */
   }
   
   .action-button.generate-resume:hover {

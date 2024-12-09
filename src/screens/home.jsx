@@ -47,7 +47,6 @@ function Home() {
         body: formData,
         headers: {
           'Accept': 'application/json',
-          'Origin': window.location.origin,
         },
       });
 
